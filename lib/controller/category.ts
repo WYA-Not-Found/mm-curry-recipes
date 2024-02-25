@@ -11,7 +11,5 @@ export const _updateCategory = (id: string, data: CategoryItem) => {
   return Category.findByIdAndUpdate(id, data);
 };
 export const _deleteCategory = (id: string) => {
-  console.log("deleted id : " + id);
-
   return Category.findByIdAndDelete(id);
 };

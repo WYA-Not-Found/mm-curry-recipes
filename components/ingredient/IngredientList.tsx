@@ -1,68 +1,63 @@
 "use client";
 import React from "react";
-import {
-  deleteCategory,
-  getCategoryList,
-  updateCategory,
-} from "@/lib/service/category";
-import { CategoryItem, CategoryResponseType } from "@/lib/types/category";
+import { deleteIngredient, getIngredientList } from "@/lib/service/ingredient";
+import { IngredientItem, IngredientResponseType } from "@/lib/types/ingredient";
 import { useEffect, useState } from "react";
-import CategoryInputForm from "./CategoryInputForm";
+import IngredientInputForm from "./IngredientInputForm";
 import Modal from "react-modal";
 import { toast } from "react-toastify";
 import Image from "next/image";
 
-const CategoryList = (): React.JSX.Element => {
-  const [categories, setCategories] = useState<CategoryResponseType[]>();
+const IngredientList = (): React.JSX.Element => {
+  const [ingredients, setIngredients] = useState<IngredientResponseType[]>();
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const emptyCategory = {
-    title: "",
-    description: "",
+  const emptyIngredient = {
+    name: "",
     image_url: "",
   };
-  const [categoryData, setCategory] = useState<CategoryItem>(emptyCategory);
-  const getCategories = async () => {
-    const categories: CategoryResponseType[] = await getCategoryList();
-    if (categories.length > 0) {
-      setCategories(categories);
+  const [ingredientData, setIngredientData] =
+    useState<IngredientItem>(emptyIngredient);
+  const getIngredients = async () => {
+    const ingredients: IngredientResponseType[] = await getIngredientList();
+    if (ingredients.length > 0) {
+      setIngredients(ingredients);
     } else {
-      setCategories([]);
+      setIngredients([]);
     }
   };
 
-  const onEditCategory = async (category: CategoryResponseType) => {
+  const onEditIngredient = async (ingredient: IngredientResponseType) => {
     const data = {
-      id: category._id,
-      title: category.title,
-      description: category.description,
-      image_url: category.image_url,
+      id: ingredient._id,
+      name: ingredient.name,
+      image_url: ingredient.image_url,
     };
-    setCategory(data);
+    setIngredientData(data);
     setOpenModal(true);
   };
 
-  const onDeleteCategory = async (id: string) => {
-    const res = await deleteCategory(id);
+  const onDeleteIngredient = async (id: string) => {
+    const res = await deleteIngredient(id);
     toast(res.message);
-    getCategories();
+    getIngredients();
   };
 
   useEffect(() => {
-    getCategories();
+    getIngredients();
   }, []);
 
   return (
     <div>
       <div className="flex justify-between items-center">
-        <h1>Category List</h1>
+        <h1>Ingredient List</h1>
         <button
           className="btn ml-4"
           onClick={() => {
-            setCategory(emptyCategory);
+            setIngredientData(emptyIngredient);
             setOpenModal(true);
           }}
         >
-          Create Category
+          Create Ingredient
         </button>
       </div>
       <div className="overflow-x-auto w-[1000px]">
@@ -75,16 +70,15 @@ const CategoryList = (): React.JSX.Element => {
                   <input type="checkbox" className="checkbox" />
                 </label>
               </th> */}
-              <th>Title</th>
-              <th>Description</th>
+              <th>name</th>
               <th>Image</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {categories?.map((category: CategoryResponseType) => {
+            {ingredients?.map((ingredient: IngredientResponseType) => {
               return (
-                <tr key={category._id}>
+                <tr key={ingredient._id}>
                   {/* <th>
                     <label>
                       <input type="checkbox" className="checkbox" />
@@ -92,14 +86,13 @@ const CategoryList = (): React.JSX.Element => {
                   </th> */}
                   <td>
                     <div className="flex items-center gap-3">
-                      <div className="font-bold">{category.title}</div>
+                      <div className="font-bold">{ingredient.name}</div>
                     </div>
                   </td>
-                  <td>{category.description}</td>
                   <td>
                     <Image
-                      src={category.image_url}
-                      alt="category image"
+                      src={ingredient.image_url}
+                      alt="ingredient image"
                       width={60}
                       height={60}
                     />
@@ -107,7 +100,7 @@ const CategoryList = (): React.JSX.Element => {
                   <th>
                     <button
                       onClick={() => {
-                        onEditCategory(category);
+                        onEditIngredient(ingredient);
                       }}
                       className="btn btn-ghost btn-xs"
                     >
@@ -115,7 +108,7 @@ const CategoryList = (): React.JSX.Element => {
                     </button>
                     <button
                       onClick={() => {
-                        onDeleteCategory(category._id);
+                        onDeleteIngredient(ingredient._id);
                       }}
                       className="btn btn-ghost btn-xs"
                     >
@@ -137,11 +130,11 @@ const CategoryList = (): React.JSX.Element => {
           }}
           contentLabel="Example Modal"
         >
-          <CategoryInputForm
-            categoryData={categoryData}
+          <IngredientInputForm
+            ingredientData={ingredientData}
             onSubmit={() => {
               setOpenModal(false);
-              getCategories();
+              getIngredients();
             }}
           />
         </Modal>
@@ -150,4 +143,4 @@ const CategoryList = (): React.JSX.Element => {
   );
 };
 
-export default CategoryList;
+export default IngredientList;

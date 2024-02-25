@@ -1,8 +1,8 @@
 "use client";
 import { createCategory, updateCategory } from "@/lib/service/category";
 import { CategoryItem } from "@/lib/types/category";
-import { title } from "process";
-import { useState } from "react";
+import { put } from "@vercel/blob";
+import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 interface CategoryPropTypes {
@@ -14,10 +14,12 @@ const CategoryInputForm = ({
   categoryData,
   onSubmit,
 }: CategoryPropTypes): React.ReactNode => {
+  const imageRef = useRef<HTMLInputElement>(null);
+
   const [category, setCategory] = useState<CategoryItem>(categoryData);
 
   const reset = () => {
-    setCategory({ title: "", description: "" });
+    setCategory({ title: "", description: "", image_url: "" });
   };
 
   const onChangeInput = (
@@ -48,14 +50,33 @@ const CategoryInputForm = ({
     setCategory(data);
   };
 
+  const onImageUpload = async (): Promise<string | void> => {
+    const files = imageRef.current?.files;
+    if (files) {
+      if (files.length > 0) {
+        const imageBlob = await put(files[0].name, files[0], {
+          access: "public",
+          token: process.env.NEXT_PUBLIC_BLOB_READ_WRITE_TOKEN,
+        });
+        return imageBlob.url;
+      }
+    } else {
+      console.log("please upload valid file");
+    }
+  };
+
   const onSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    const image = await onImageUpload();
     if (category) {
       var res;
       if (category.id) {
-        res = await updateCategory(category);
+        res = await updateCategory({
+          ...category,
+          image_url: image ?? category.image_url,
+        });
       } else {
-        res = await createCategory(category);
+        res = await createCategory({ ...category, image_url: image ?? "" });
       }
       toast(res.message);
       reset();
@@ -71,7 +92,7 @@ const CategoryInputForm = ({
         <h1 className="pt-4 px-10 font-bold">Add New Category</h1>
         <div className="card-body">
           <form onSubmit={onSubmitForm}>
-            <div className="form-control">
+            <div className="form-control mb-2">
               <div className="label">
                 <span className="label-text">Title</span>
               </div>
@@ -85,9 +106,9 @@ const CategoryInputForm = ({
                 className="input input-bordered w-full"
               />
             </div>
-            <div className="form-control">
+            <div className="form-control mb-2">
               <div className="label">
-                <span className="label-text">Description</span>
+                <span className="label-text">Description (optional)</span>
               </div>
               <textarea
                 onChange={(e) => {
@@ -97,6 +118,16 @@ const CategoryInputForm = ({
                 className="textarea textarea-bordered"
                 placeholder="Category descripton..."
               ></textarea>
+            </div>
+            <div className="form-control mb-2">
+              <div className="label">
+                <span className="label-text">Image</span>
+              </div>
+              <input
+                ref={imageRef}
+                type="file"
+                className="file-input w-full max-w-xs"
+              />
             </div>
             <button type="submit" className="btn mt-4">
               Submit

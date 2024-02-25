@@ -1,28 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  _createCategory,
-  _deleteCategory,
-  _getCategoryList,
-  _updateCategory,
-} from "@/lib/controller/category";
-import { CategoryItem } from "@/lib/types/category";
+  _createIngredient,
+  _deleteIngredient,
+  _getIngredientList,
+  _updateIngredient,
+} from "@/lib/controller/ingredient";
+import { IngredientItem } from "@/lib/types/ingredient";
 
 export async function GET() {
-  const categories = await _getCategoryList();
-  return NextResponse.json({ status: 200, data: categories });
+  const ingredients = await _getIngredientList();
+  return NextResponse.json({ status: 200, data: ingredients });
 }
 
 export async function POST(request: NextRequest) {
-  const { title, description, image_url }: CategoryItem = await request.json();
+  const { name, image_url }: IngredientItem = await request.json();
 
-  if (title && image_url) {
-    await _createCategory({
-      title,
-      description,
+  if (name && image_url) {
+    await _createIngredient({
+      name,
       image_url: image_url,
     });
     return NextResponse.json({
-      message: "Successfully created new category!",
+      message: "Successfully created new ingredient!",
       status: 200,
     });
   } else {
@@ -33,12 +32,11 @@ export async function POST(request: NextRequest) {
   }
 }
 export async function PUT(request: NextRequest) {
-  const { id, title, description, image_url }: CategoryItem =
-    await request.json();
-  if (id && title && image_url) {
-    await _updateCategory(id, { title, description, image_url });
+  const { id, name, image_url }: IngredientItem = await request.json();
+  if (id && name && image_url) {
+    await _updateIngredient(id, { name, image_url });
     return NextResponse.json({
-      message: "Successfully update category!",
+      message: "Successfully update ingredient!",
       status: 200,
     });
   } else {
@@ -51,9 +49,9 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const { id }: { id: string } = await request.json();
   if (id) {
-    await _deleteCategory(id);
+    await _deleteIngredient(id);
     return NextResponse.json({
-      message: "Successfully removed category!",
+      message: "Successfully removed ingredient!",
       status: 200,
     });
   } else {
